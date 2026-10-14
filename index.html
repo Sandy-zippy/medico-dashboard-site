@@ -1,0 +1,508 @@
+<title>Medico Ads Dashboard</title><meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: dashboard read top to bottom. Numbers, then creatives as image cards, then keywords, then the plan. ZippyScale brand tokens. */
+:root{
+  --bg:#FFFDF7; --surface:#F3F1E8; --card:#FFFFFF; --fg:#2A2A35; --muted:#62626E; --line:#E0DDD0;
+  --lime:#D5EB4B; --lime-ink:#2A2A35; --meta:#2A2A35; --google:#8C8A7C;
+  --good:#2F7D4F; --warn:#A8660B; --bad:#B23A3A;
+  --display:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1C1C23; --surface:#25252F; --card:#2A2A35; --fg:#F2F0E6; --muted:#A9A8B4; --line:#3A3A47;
+  --lime:#D5EB4B; --lime-ink:#1C1C23; --meta:#F2F0E6; --google:#8E8C9C;
+  --good:#6CC08E; --warn:#E3A84A; --bad:#E77B7B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1C1C23; --surface:#25252F; --card:#2A2A35; --fg:#F2F0E6; --muted:#A9A8B4; --line:#3A3A47;
+  --lime:#D5EB4B; --lime-ink:#1C1C23; --meta:#F2F0E6; --google:#8E8C9C;
+  --good:#6CC08E; --warn:#E3A84A; --bad:#E77B7B; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--body);margin:0}
+.wrap{max-width:1040px;margin:0 auto;padding-inline:20px;padding-block:36px 72px}
+h1,h2,h3{font-family:var(--display);line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:clamp(28px,4.6vw,42px);font-weight:700}
+h2{font-size:22px;font-weight:600;margin:52px 0 16px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+h2 small{font:500 13px var(--body);color:var(--muted)}
+h3{font-size:16px;font-weight:600}
+.eyebrow{font:600 12px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.meta{color:var(--muted);font-size:14px;margin:8px 0 0}
+.num{font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font:600 11px/1.6 var(--body);letter-spacing:.03em;text-transform:uppercase;padding:0 8px;border-radius:99px;border:1px solid currentColor;white-space:nowrap}
+.good{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)} .mut{color:var(--muted)}
+.lime{background:var(--lime);color:var(--lime-ink);border-color:var(--lime)}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:26px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;gap:4px}
+.kpi b{font:700 30px/1.05 var(--display);font-variant-numeric:tabular-nums}
+.kpi span{font-size:13px;color:var(--muted)}
+.kpi.hero{background:var(--lime);border-color:var(--lime);color:var(--lime-ink)}
+.kpi.hero span{color:var(--lime-ink);opacity:.75}
+
+/* split bars */
+.splits{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-top:12px}
+.split{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;min-width:0}
+.split h3{font-size:14px;margin-bottom:12px}
+.bar{display:grid;grid-template-columns:72px 1fr 92px;align-items:center;gap:10px;font-size:13px;margin-top:8px}
+.track{height:12px;background:var(--surface);border-radius:6px;overflow:hidden}
+.fill{height:100%;background:var(--fg);border-radius:6px}
+.fill.alt{background:var(--google)}
+.fill.l{background:var(--lime)}
+.bar .v{text-align:right;font-variant-numeric:tabular-nums}
+.days{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;align-items:end;height:120px;margin-top:10px}
+.day{display:grid;justify-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.day i{display:block;width:100%;max-width:44px;background:var(--lime);border-radius:6px 6px 2px 2px}
+.day b{font:600 13px var(--display);color:var(--fg)}
+
+/* creatives */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.cc{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.cc img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;background:var(--surface)}
+.cc .body{padding:14px 16px 16px;display:grid;gap:10px}
+.cc .top{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.cc .hook{font-size:13px;color:var(--muted)}
+.ct{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+.ct th{font-weight:600;color:var(--muted);text-align:right;padding:4px 4px;border-bottom:1px solid var(--line)}
+.ct th:first-child,.ct td:first-child{text-align:left}
+.ct td{text-align:right;padding:5px 4px;border-bottom:1px solid var(--line)}
+.ct tr.on td:first-child::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--good);margin-right:6px;vertical-align:1px}
+.ct tr.off td{color:var(--muted)}
+.ct td.lead{font-weight:700}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:-6px 0 14px}
+.legend span::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:1px;background:var(--good)}
+.legend span.p::before{background:var(--line)}
+
+/* next tests */
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.tc{background:var(--card);border:1px dashed var(--muted);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.tc img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}
+.tc .ph{aspect-ratio:1/1;display:grid;place-items:center;background:var(--surface);padding:18px;text-align:center;font:600 18px/1.25 var(--display)}
+.tc .body{padding:12px 14px 14px;display:grid;gap:6px;font-size:13px}
+.tc .body b{font-family:var(--display);font-size:15px}
+.copyline{font-size:13px;background:var(--surface);border-radius:6px;padding:8px 10px}
+
+/* keywords */
+.tbl{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:12px}
+table.kw{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums;min-width:640px}
+.kw th{font:600 11px/1.3 var(--body);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}
+.kw td{padding:8px 12px;border-bottom:1px solid var(--line)}
+.kw tr:last-child td{border-bottom:0}
+.kw .n{text-align:right}
+.kw .grp td{background:var(--surface);font:600 12px var(--body);text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{font-size:12.5px;padding:3px 10px;border-radius:99px;background:var(--surface);text-decoration:line-through;text-decoration-color:var(--bad)}
+.note{display:flex;gap:10px;align-items:flex-start;font-size:14px;margin-top:12px;max-width:80ch}
+.note .pill{margin-top:2px}
+
+/* done + week */
+.tl{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.tl div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:13.5px}
+.tl b{display:block;font-family:var(--display);font-size:15px;margin-bottom:4px}
+.week{display:grid;gap:8px}
+.week div{display:grid;grid-template-columns:70px 130px 1fr;gap:12px;align-items:baseline;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:14px}
+.week .d{font:600 14px var(--display)}
+.week .who{font-size:12px;color:var(--muted);font-weight:600}
+.week .act{background:var(--lime);border-color:var(--lime);color:var(--lime-ink)}
+.week .act .who{color:var(--lime-ink)}
+@media (max-width:600px){.week div{grid-template-columns:1fr;gap:2px}.bar{grid-template-columns:60px 1fr 80px}}
+.win{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:12px}
+.win div{background:var(--lime);color:var(--lime-ink);border-radius:12px;padding:16px 18px;display:grid;gap:6px}
+.win .eyebrow{color:var(--lime-ink);opacity:.7}
+.win b{font:600 18px/1.25 var(--display)}
+.win span:last-child{font-size:13.5px}
+.fat{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.fat div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:8px;font-size:13px}
+.fat b{font:600 14px var(--display)}
+.fat .big{font:700 26px/1 var(--display);font-variant-numeric:tabular-nums}
+.gauge{height:8px;background:var(--surface);border-radius:4px;overflow:hidden}
+.gauge i{display:block;height:100%;border-radius:4px}
+.funnel{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:12px}
+.funnel div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:4px;justify-items:start}
+.funnel b{font:700 26px/1.05 var(--display);font-variant-numeric:tabular-nums}
+.funnel span{font-size:13px;color:var(--muted)}
+.funnel .pill{margin-top:4px}
+ul.fix{list-style:none;padding:0;margin:0;display:grid;gap:10px;font-size:13.5px}
+ul.fix li{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:start}
+ul.fix .pill{justify-self:start;margin-top:2px}
+.strip{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(150px,1fr);gap:12px;overflow-x:auto;padding-bottom:6px}
+.shot{display:grid;gap:6px;text-decoration:none;color:var(--fg);min-width:0}
+.shot img{width:100%;aspect-ratio:390/600;object-fit:cover;object-position:top;border-radius:12px;border:1px solid var(--line);display:block}
+.shot span{font:600 13.5px var(--display)}
+.shot small{display:block;font:500 12px var(--body);color:var(--muted)}
+.shot:hover img,.shot:focus-visible img{outline:3px solid var(--lime);outline-offset:2px}
+.heat{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:14px;align-items:start}
+.heat figure{margin:0;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.heat img{display:block;width:100%}
+.heat figcaption{font-size:12.5px;color:var(--muted);padding:8px 12px}
+.hstats{display:grid;gap:10px}
+.hstats .kpi b{font-size:22px}
+@media (max-width:760px){.heat{grid-template-columns:1fr}}
+footer{margin-top:56px;font-size:12.5px;color:var(--muted)}
+</style>
+
+<style>
+.negs{display:grid;gap:6px;margin-top:10px}.negs summary{cursor:pointer;font-weight:600;padding:6px 0}
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:4px;overflow-x:auto;padding:10px 0;margin-top:18px;border-bottom:1px solid var(--line)}
+.tabs button{font:600 14px var(--body);color:var(--muted);background:none;border:0;padding:8px 14px;border-radius:99px;cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected="true"]{background:var(--lime);color:var(--lime-ink)}
+.tabs button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.panel>h2:first-child{margin-top:24px}
+.alerts{display:grid;gap:8px}
+.alert{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--bad);border-radius:10px;padding:10px 14px;font-size:14px}
+.alert span:not(.pill){grid-column:1;color:var(--muted);font-size:13px}
+.alert .pill{grid-row:1/3;grid-column:2}
+.leads{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:12px}
+.lead{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--good);border-radius:12px;padding:14px 16px;display:grid;gap:8px;min-width:0}
+.lead.open{border-left-color:var(--bad)}
+.lead header{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.lead header b{font:600 17px var(--display)}
+.lead .sub{margin:0;font-size:12.5px;color:var(--muted)}
+.lead dl{display:grid;grid-template-columns:72px 1fr;gap:4px 10px;margin:0;font-size:13.5px}
+.lead dt{color:var(--muted);font-size:12.5px}
+.lead dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.lead footer{display:flex;justify-content:space-between;gap:8px;font-size:13px;border-top:1px solid var(--line);padding-top:8px}
+.lead footer a{color:var(--fg)}
+.mails{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;margin-top:12px}
+.mail{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:8px;min-width:0;align-content:start}
+.mail header{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.mail header b{font:600 17px var(--display)}
+.mail .sub,.mail .subj{margin:0;font-size:13px;color:var(--muted)}
+.mail .subj b{color:var(--fg)}
+.mail pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.55 var(--body);border-top:1px solid var(--line);padding-top:10px}
+.mail h4{margin:4px 0 0;font:600 13px var(--display)}
+.mail .notes{margin:0;padding-left:18px;font-size:13.5px;display:grid;gap:6px}
+.mail footer{font-size:13px;border-top:1px solid var(--line);padding-top:8px}
+.mail footer a{color:var(--fg)}
+.todo{display:grid;gap:6px;margin-top:10px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:12px;padding:14px 18px;color:inherit;text-decoration:none}
+.todo b{font:600 17px/1.25 var(--display)}
+.todo span:last-child{font-size:13.5px;color:var(--muted)}
+.howto{background:var(--lime);color:var(--lime-ink);border-radius:12px;padding:14px 18px}
+.howto ol{margin:0;padding-left:20px;display:grid;gap:6px}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--good)}
+</style><div class="wrap">
+  <div class="eyebrow">ZippyScale × Medico Construction &amp; Design</div>
+  <h1>Medico ads dashboard</h1>
+  <p class="meta"><span class="live" data-built="2026-10-14T16:59:11.620083+00:00">Updated Wed 14 Oct, 9:59 AM PT</span> · Leads and contact times from Monday, spend from Meta and Google Ads. Refreshes every hour.</p>
+  <nav class="tabs" role="tablist"><button role="tab" id="t-overview" aria-controls="overview" aria-selected="true">Overview</button><button role="tab" id="t-leads" aria-controls="leads" aria-selected="false">Leads</button><button role="tab" id="t-speed" aria-controls="speed" aria-selected="false">Speed to lead</button><button role="tab" id="t-appts" aria-controls="appts" aria-selected="false">Appointments</button><button role="tab" id="t-emails" aria-controls="emails" aria-selected="false">Emails</button><button role="tab" id="t-weekly" aria-controls="weekly" aria-selected="false">Weekly</button><button role="tab" id="t-ads" aria-controls="ads" aria-selected="false">Ads analysis</button><button role="tab" id="t-google" aria-controls="google" aria-selected="false">Google Ads</button><button role="tab" id="t-keywords" aria-controls="keywords" aria-selected="false">Keywords</button><button role="tab" id="t-page" aria-controls="page" aria-selected="false">Landing page</button><button role="tab" id="t-work" aria-controls="work" aria-selected="false">Work log</button></nav>
+<section class="panel" role="tabpanel" id="overview" aria-labelledby="t-overview">
+  <div class="kpis">
+    <div class="kpi hero"><b>16</b><span>Paid leads since 30 Sep</span></div>
+    <div class="kpi"><b>CAD 94.08</b><span>Cost per lead, Meta + Google</span></div>
+    <div class="kpi"><b>CAD 1,505</b><span>Ad spend since 30 Sep (Meta CAD 1,054 · Google CAD 451)</span></div>
+    <div class="kpi"><b>2.5 days</b><span>Median time to first contact</span></div>
+  </div>
+  <h2>Needs a call now <small>still "New" on Monday</small></h2>
+  <div class="alerts"><div class="alert"><b>Jennifer H. · Specialist Clinic · Calgary area</b><span>Meta ad · arrived Wed 14 Oct, 8:41 AM PT · <a href="https://riarh-group.monday.com/boards/18427834718/pulses/13290062182" target="_blank" rel="noopener">Open in Monday</a></span><span class="pill bad" data-since="2026-10-14T15:41:53.793Z">Waiting 1.3 h</span></div><div class="alert"><b>Megan C. · Medical / Family Practice · Vancouver Island</b><span>Meta ad · arrived Tue 13 Oct, 6:40 PM PT · <a href="https://riarh-group.monday.com/boards/18427834718/pulses/13283810589" target="_blank" rel="noopener">Open in Monday</a></span><span class="pill bad" data-since="2026-10-14T01:40:09.325Z">Waiting 15.3 h</span></div></div>
+  <p class="note"><span class="pill mut">Alerts</span><span>Every new Meta and Google lead is emailed to Dal, Rochelle and ZippyScale the moment it arrives. Leads moved to another Monday board count as picked up.</span></p>
+  <h2>For Ameya <small>creative briefs</small></h2>
+  <a href="https://claude.ai/artifact/FTHVD8Eb7rLdaBkgopQyF4" target="_blank" rel="noopener" class="todo" style="border-left-color:var(--fg)"><span class="eyebrow">Riarh Group · Meta test 01 · 14 Oct</span><b>Creative direction: the first 3 Facebook ads</b><span>Sample ads in feed and Story sizes, exact copy, design rules and the long-running ads behind each choice. Open the brief &#8599;</span></a><a href="#emails" class="todo" onclick="document.getElementById('t-emails').click();return false"><span class="eyebrow">Reminder emails · step 4 · about 2 min</span><b>Connect Medico's Gmail to Monday</b><span>So appointment reminders can go out from info@. Steps on the Emails tab &#8599;</span></a>
+  <h2>Coming up <small>drops off once the date passes</small></h2>
+  <div class="week">
+    <div><span class="d">To do</span><span class="who">Ameya</span><span>Connect Medico&#x27;s Gmail to Monday so reminder emails can send (steps on the Emails tab)</span></div>
+    <div><span class="d">To do</span><span class="who">Medico team</span><span>Read the 5 reminder emails on Monday and set each one to Approved, or leave a change</span></div>
+    <div><span class="d">21 Oct</span><span class="who">ZippyScale</span><span>Google: first bid change allowed after the 14 Oct fixes, if Clinic Build still misses searches</span></div>
+    <div><span class="d">28 Oct</span><span class="who">Both</span><span>Day 28: judge Google and Meta on lead quality from the team&#x27;s calls, then move budget to what works</span></div>
+  </div>
+</section><section class="panel" role="tabpanel" id="leads" aria-labelledby="t-leads" hidden><p class="note" style="margin-top:20px"><span class="pill mut">16 leads</span><span>2 waiting for a first call · 14 contacted. Newest first. Phone and email are in Monday.</span></p><div class="leads"><article class="lead open"><header><b>Jennifer H.</b><span class="pill bad" data-since="2026-10-14T15:41:53.793Z">Waiting 1.3 h</span></header><p class="sub">Wed 14 Oct, 8:41 AM PT · Meta ad · Meta ad · Grade B</p><dl><dt>Project</dt><dd>New clinic</dd><dt>Clinic</dt><dd>Specialist Clinic</dd><dt>Space</dt><dd>I&#x27;m actively looking at spaces</dd><dt>Size</dt><dd>5,000+ sq. ft.</dd><dt>Start</dt><dd>12+ months</dd><dt>Area</dt><dd>Calgary area</dd><dt>Role</dt><dd>Clinic owner / practitioner</dd></dl><footer><span>Monday: <b>New</b></span><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13290062182" target="_blank" rel="noopener">Open in Monday</a></footer></article><article class="lead open"><header><b>Megan C.</b><span class="pill bad" data-since="2026-10-14T01:40:09.325Z">Waiting 15.3 h</span></header><p class="sub">Tue 13 Oct, 6:40 PM PT · Meta ad · Meta ad · Grade A</p><dl><dt>Project</dt><dd>Renovation</dd><dt>Clinic</dt><dd>Medical / Family Practice</dd><dt>Space</dt><dd>I already have a location</dd><dt>Size</dt><dd>3,000-5,000 sq. ft.</dd><dt>Start</dt><dd>6-12 months</dd><dt>Area</dt><dd>Vancouver Island</dd><dt>Role</dt><dd>Clinic owner / practitioner</dd></dl><footer><span>Monday: <b>New</b></span><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13283810589" target="_blank" rel="noopener">Open in Monday</a></footer></article><article class="lead"><header><b>Golda S.</b><span class="pill good">24 min</span></header><p class="sub">Tue 13 Oct, 1:52 PM PT · Meta ad · Meta ad · Grade A</p><dl><dt>Project</dt><dd>New clinic</dd><dt>Clinic</dt><dd>Med Spa / Aesthetics</dd><dt>Space</dt><dd>I&#x27;m negotiating a lease or purchase</dd><dt>Size</dt><dd>Under 1,500 sq. ft.</dd><dt>Start</dt><dd>Within 3 months</dd><dt>Area</dt><dd>Fraser Valley</dd><dt>Role</dt><dd>Clinic owner / practitioner</dd></dl><footer><span>Monday: <b>In Progress</b></span><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13281895835" target="_blank" rel="noopener">Open in Monday</a></footer></article><article class="lead"><header><b>Mersedeh S.</b><span class="pill warn">14.0 h</span></header><p class="sub">Mon 12 Oct, 6:47 PM PT · Meta ad · Meta ad · Grade B</p><dl><dt>Project</dt><dd>New clinic</dd><dt>Clinic</dt><dd>Dental</dd><dt>Space</dt><dd>I&#x27;m actively looking at spaces</dd><dt>Size</dt><dd>Under 1,500 sq. ft.</dd><dt>Start</dt><dd>12+ months</dd><dt>Area</dt><dd>Metro Vancouver</dd><dt>Role</dt><dd>Clinic owner / practitioner</dd></dl><footer><span>Monday: <b>In Progress</b></span><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13272105847" target="_blank" rel="noopener">Open in Monday</a></footer></article><article class="lead"><header><b>William T.</b><span class="pill bad">2.8 days</span></header><p class="sub">Sat 10 Oct, 1:22 PM PT · Meta ad · Meta ad · Grade A</p><dl><dt>Project</dt><dd>New clinic</dd><dt>Clinic</dt><dd>Specialist Clinic</dd><dt>Space</dt><dd>I&#x27;m negotiating a lease or purchase</dd><dt>Size</dt><dd>1,500-3,000 sq. ft.</dd><dt>Start</dt><dd>3-6 months</dd><dt>Area</dt><dd>Vancouver Island</dd><dt>Role</dt><dd>Clinic owner / practitioner</dd></dl><footer><span>Monday: <b>In Progress</b></span><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13256757671" target="_blank" rel="noopener">Open in Monday</a></footer></article><article class="lead"><header><b>Jatinder B.</b><span class="pill bad">4.8 days</span></header><p class="sub">Thu 08 Oct, 1:39 PM PT · Google ad · Google search · Grade A</p><dl><dt>Project</dt><dd>New clinic</dd><dt>Clinic</dt><dd>Dental</dd><dt>Space</dt><dd>I already have a location</dd><dt>Size</dt><dd>1,500-3,000 sq. ft.</dd><dt>Start</dt><dd>6-12 months</dd><dt>Area</dt><dd>Calgary area</dd><dt>Role</dt><dd>Clinic owner / practitioner</dd></dl><footer><span>Monday: <b>In Progress</b></span><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13242714251" target="_blank" rel="noopener">Open in Monday</a></footer></article><article class="lead"><header><b>Kobe B.</b><span class="pill warn">21.3 h</span></header><p class="sub">Tue 06 Oct, 5:16 PM PT · Google ad · Google search · Grade C</p><dl><dt>Project</dt><dd>Renovation</dd><dt>Clinic</dt><dd>Medical / Family Practice</dd><dt>Space</dt><dd>I&#x27;m negotiating a lease or purchase</dd><dt>Size</dt><dd>1,500-3,000 sq. ft.</dd><dt>Start</dt><dd>Within 3 months</dd><dt>Area</dt><dd>Fraser Valley</dd><dt>Role</dt><dd>Other</dd></dl><footer><span>Monday: <b>In Progress</b></span><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13224200935" target="_blank" rel="noopener">Open in Monday</a></footer></article><article class="lead"><header><b>Harmandeep S.</b><span class="pill good">39 min</span></header><p class="sub">Tue 06 Oct, 3:02 PM PT · Meta ad · Still planning · Grade A</p><dl><dt>Project</dt><dd>New clinic</dd><dt>Clinic</dt><dd>Physiotherapy / Chiropractic</dd><dt>Space</dt><dd>I already have a location</dd><dt>Size</dt><dd>1,500-3,000 sq. ft.</dd><dt>Start</dt><dd>3-6 months</dd><dt>Area</dt><dd>Calgary area</dd><dt>Role</dt><dd>Clinic owner / practitioner</dd></dl><footer><span>Monday: <b>In Progress</b></span><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13223494355" target="_blank" rel="noopener">Open in Monday</a></footer></article><article class="lead"><header><b>Anu</b><span class="pill warn">1.8 h</span></header><p class="sub">Mon 05 Oct, 11:23 AM PT · Meta ad · Found a space · Grade A</p><dl><dt>Project</dt><dd>Renovation</dd><dt>Clinic</dt><dd>Physiotherapy / Chiropractic</dd><dt>Space</dt><dd>I already have a location</dd><dt>Size</dt><dd>Under 1,500 sq. ft.</dd><dt>Start</dt><dd>Within 3 months</dd><dt>Area</dt><dd>Metro Vancouver</dd><dt>Role</dt><dd>Clinic owner / practitioner</dd></dl><footer><span>Monday: <b>Moved to Medico Email Campaign</b></span><a href="https://riarh-group.monday.com/boards/18427834866/pulses/13210341330" target="_blank" rel="noopener">Open in Monday</a></footer></article><article class="lead"><header><b>Minika</b><span class="pill warn">21.0 h</span></header><p class="sub">Sun 04 Oct, 4:06 PM PT · Meta ad · Found a space · Grade B</p><dl><dt>Project</dt><dd>New clinic</dd><dt>Clinic</dt><dd>Medical / Family Practice</dd><dt>Space</dt><dd>I&#x27;m actively looking at spaces</dd><dt>Size</dt><dd>Under 1,500 sq. ft.</dd><dt>Start</dt><dd>12+ months</dd><dt>Area</dt><dd>Metro Vancouver</dd><dt>Role</dt><dd>Clinic owner / practitioner</dd></dl><footer><span>Monday: <b>In Progress</b></span><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13202309067" target="_blank" rel="noopener">Open in Monday</a></footer></article><article class="lead"><header><b>Martin E.</b><span class="pill bad">2.2 days</span></header><p class="sub">Sun 04 Oct, 11:23 AM PT · Google ad · Google search · Grade A</p><dl><dt>Project</dt><dd>New clinic</dd><dt>Clinic</dt><dd>Medical / Family Practice</dd><dt>Space</dt><dd>I already have a location</dd><dt>Size</dt><dd>3,000-5,000 sq. ft.</dd><dt>Start</dt><dd>3-6 months</dd><dt>Area</dt><dd>Calgary area</dd><dt>Role</dt><dd>Practice manager</dd></dl><footer><span>Monday: <b>In Progress</b></span><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13201732564" target="_blank" rel="noopener">Open in Monday</a></footer></article><article class="lead"><header><b>Anna R.</b><span class="pill bad">3.3 days</span></header><p class="sub">Sat 03 Oct, 7:09 AM PT · Meta ad · Expanding · Grade A</p><dl><dt>Project</dt><dd>New clinic</dd><dt>Clinic</dt><dd>Other</dd><dt>Space</dt><dd>I&#x27;m negotiating a lease or purchase</dd><dt>Size</dt><dd>Under 1,500 sq. ft.</dd><dt>Start</dt><dd>3-6 months</dd><dt>Area</dt><dd>Edmonton area</dd><dt>Role</dt><dd>Clinic owner / practitioner</dd></dl><footer><span>Monday: <b>Moved to Medico Email Campaign</b></span><a href="https://riarh-group.monday.com/boards/18427834866/pulses/13198850084" target="_blank" rel="noopener">Open in Monday</a></footer></article><article class="lead"><header><b>Mohammad A.</b><span class="pill bad">4.3 days</span></header><p class="sub">Fri 02 Oct, 7:28 AM PT · Meta ad · Expanding · Grade A</p><dl><dt>Project</dt><dd>Renovation</dd><dt>Clinic</dt><dd>Medical / Family Practice</dd><dt>Space</dt><dd>I already have a location</dd><dt>Size</dt><dd>Under 1,500 sq. ft.</dd><dt>Start</dt><dd>Within 3 months</dd><dt>Area</dt><dd>Calgary area</dd><dt>Role</dt><dd>Practice manager</dd></dl><footer><span>Monday: <b>In Progress</b></span><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13192857532" target="_blank" rel="noopener">Open in Monday</a></footer></article><article class="lead"><header><b>Jumai</b><span class="pill bad">4.5 days</span></header><p class="sub">Fri 02 Oct, 2:14 AM PT · Meta ad · Expanding · Grade A</p><dl><dt>Project</dt><dd>New clinic</dd><dt>Clinic</dt><dd>Other</dd><dt>Space</dt><dd>I already have a location</dd><dt>Size</dt><dd>Under 1,500 sq. ft.</dd><dt>Start</dt><dd>3-6 months</dd><dt>Area</dt><dd>Edmonton area</dd><dt>Role</dt><dd>Clinic owner / practitioner</dd></dl><footer><span>Monday: <b>In Progress</b></span><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13190903685" target="_blank" rel="noopener">Open in Monday</a></footer></article><article class="lead"><header><b>Paige T.</b><span class="pill bad">5.0 days</span></header><p class="sub">Thu 01 Oct, 3:09 PM PT · Meta ad · $0 design · Grade A</p><dl><dt>Project</dt><dd>Renovation</dd><dt>Clinic</dt><dd>Other</dd><dt>Space</dt><dd>I&#x27;m negotiating a lease or purchase</dd><dt>Size</dt><dd>1,500-3,000 sq. ft.</dd><dt>Start</dt><dd>Within 3 months</dd><dt>Area</dt><dd>Edmonton area</dd><dt>Role</dt><dd>Clinic owner / practitioner</dd></dl><footer><span>Monday: <b>In Progress</b></span><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13187927457" target="_blank" rel="noopener">Open in Monday</a></footer></article><article class="lead"><header><b>Nabeel S.</b><span class="pill bad">5.1 days</span></header><p class="sub">Thu 01 Oct, 11:48 AM PT · Google ad · Google search · Grade A</p><dl><dt>Project</dt><dd>New clinic</dd><dt>Clinic</dt><dd>Dental</dd><dt>Space</dt><dd>I already have a location</dd><dt>Size</dt><dd>1,500-3,000 sq. ft.</dd><dt>Start</dt><dd>3-6 months</dd><dt>Area</dt><dd>Edmonton area</dd><dt>Role</dt><dd>Clinic owner / practitioner</dd></dl><footer><span>Monday: <b>In Progress</b></span><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13185839103" target="_blank" rel="noopener">Open in Monday</a></footer></article></div></section><section class="panel" role="tabpanel" id="speed" aria-labelledby="t-speed" hidden>
+  <div class="kpis">
+    <div class="kpi"><b>2.5 days</b><span>Median time to first contact</span></div>
+    <div class="kpi"><b>12%</b><span>Contacted within 1 hour</span></div>
+    <div class="kpi"><b>38%</b><span>Contacted within 24 hours</span></div>
+    <div class="kpi hero"><b>2</b><span>Waiting for a first call</span></div>
+  </div>
+  <div class="tbl" style="margin-top:14px"><table class="kw">
+    <thead><tr><th>Arrived (PT)</th><th>Lead</th><th>Channel</th><th>Area</th><th>Clinic</th><th>Size</th><th>Start</th><th>Monday status</th><th>First contact after</th></tr></thead>
+    <tbody><tr><td>Wed 14 Oct, 8:41 AM</td><td>Jennifer H.<br><small><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13290062182" target="_blank" rel="noopener">Monday</a></small></td><td>Meta ad</td><td>Calgary area</td><td>Specialist Clinic</td><td>5,000+ sq. ft.</td><td>12+ months</td><td>New</td><td><span class="pill bad" data-since="2026-10-14T15:41:53.793Z">Waiting 1.3 h</span></td></tr><tr><td>Tue 13 Oct, 6:40 PM</td><td>Megan C.<br><small><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13283810589" target="_blank" rel="noopener">Monday</a></small></td><td>Meta ad</td><td>Vancouver Island</td><td>Medical / Family Practice</td><td>3,000-5,000 sq. ft.</td><td>6-12 months</td><td>New</td><td><span class="pill bad" data-since="2026-10-14T01:40:09.325Z">Waiting 15.3 h</span></td></tr><tr><td>Tue 13 Oct, 1:52 PM</td><td>Golda S.<br><small><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13281895835" target="_blank" rel="noopener">Monday</a></small></td><td>Meta ad</td><td>Fraser Valley</td><td>Med Spa / Aesthetics</td><td>Under 1,500 sq. ft.</td><td>Within 3 months</td><td>In Progress</td><td><span class="pill good">24 min</span></td></tr><tr><td>Mon 12 Oct, 6:47 PM</td><td>Mersedeh S.<br><small><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13272105847" target="_blank" rel="noopener">Monday</a></small></td><td>Meta ad</td><td>Metro Vancouver</td><td>Dental</td><td>Under 1,500 sq. ft.</td><td>12+ months</td><td>In Progress</td><td><span class="pill warn">14.0 h</span></td></tr><tr><td>Sat 10 Oct, 1:22 PM</td><td>William T.<br><small><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13256757671" target="_blank" rel="noopener">Monday</a></small></td><td>Meta ad</td><td>Vancouver Island</td><td>Specialist Clinic</td><td>1,500-3,000 sq. ft.</td><td>3-6 months</td><td>In Progress</td><td><span class="pill bad">2.8 days</span></td></tr><tr><td>Thu 08 Oct, 1:39 PM</td><td>Jatinder B.<br><small><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13242714251" target="_blank" rel="noopener">Monday</a></small></td><td>Google ad</td><td>Calgary area</td><td>Dental</td><td>1,500-3,000 sq. ft.</td><td>6-12 months</td><td>In Progress</td><td><span class="pill bad">4.8 days</span></td></tr><tr><td>Tue 06 Oct, 5:16 PM</td><td>Kobe B.<br><small><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13224200935" target="_blank" rel="noopener">Monday</a></small></td><td>Google ad</td><td>Fraser Valley</td><td>Medical / Family Practice</td><td>1,500-3,000 sq. ft.</td><td>Within 3 months</td><td>In Progress</td><td><span class="pill warn">21.3 h</span></td></tr><tr><td>Tue 06 Oct, 3:02 PM</td><td>Harmandeep S.<br><small><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13223494355" target="_blank" rel="noopener">Monday</a></small></td><td>Meta ad</td><td>Calgary area</td><td>Physiotherapy / Chiropractic</td><td>1,500-3,000 sq. ft.</td><td>3-6 months</td><td>In Progress</td><td><span class="pill good">39 min</span></td></tr><tr><td>Mon 05 Oct, 11:23 AM</td><td>Anu<br><small><a href="https://riarh-group.monday.com/boards/18427834866/pulses/13210341330" target="_blank" rel="noopener">Monday</a></small></td><td>Meta ad</td><td>Metro Vancouver</td><td>Physiotherapy / Chiropractic</td><td>Under 1,500 sq. ft.</td><td>Within 3 months</td><td>Moved to Medico Email Campaign</td><td><span class="pill warn">1.8 h</span></td></tr><tr><td>Sun 04 Oct, 4:06 PM</td><td>Minika<br><small><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13202309067" target="_blank" rel="noopener">Monday</a></small></td><td>Meta ad</td><td>Metro Vancouver</td><td>Medical / Family Practice</td><td>Under 1,500 sq. ft.</td><td>12+ months</td><td>In Progress</td><td><span class="pill warn">21.0 h</span></td></tr><tr><td>Sun 04 Oct, 11:23 AM</td><td>Martin E.<br><small><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13201732564" target="_blank" rel="noopener">Monday</a></small></td><td>Google ad</td><td>Calgary area</td><td>Medical / Family Practice</td><td>3,000-5,000 sq. ft.</td><td>3-6 months</td><td>In Progress</td><td><span class="pill bad">2.2 days</span></td></tr><tr><td>Sat 03 Oct, 7:09 AM</td><td>Anna R.<br><small><a href="https://riarh-group.monday.com/boards/18427834866/pulses/13198850084" target="_blank" rel="noopener">Monday</a></small></td><td>Meta ad</td><td>Edmonton area</td><td>Other</td><td>Under 1,500 sq. ft.</td><td>3-6 months</td><td>Moved to Medico Email Campaign</td><td><span class="pill bad">3.3 days</span></td></tr><tr><td>Fri 02 Oct, 7:28 AM</td><td>Mohammad A.<br><small><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13192857532" target="_blank" rel="noopener">Monday</a></small></td><td>Meta ad</td><td>Calgary area</td><td>Medical / Family Practice</td><td>Under 1,500 sq. ft.</td><td>Within 3 months</td><td>In Progress</td><td><span class="pill bad">4.3 days</span></td></tr><tr><td>Fri 02 Oct, 2:14 AM</td><td>Jumai<br><small><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13190903685" target="_blank" rel="noopener">Monday</a></small></td><td>Meta ad</td><td>Edmonton area</td><td>Other</td><td>Under 1,500 sq. ft.</td><td>3-6 months</td><td>In Progress</td><td><span class="pill bad">4.5 days</span></td></tr><tr><td>Thu 01 Oct, 3:09 PM</td><td>Paige T.<br><small><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13187927457" target="_blank" rel="noopener">Monday</a></small></td><td>Meta ad</td><td>Edmonton area</td><td>Other</td><td>1,500-3,000 sq. ft.</td><td>Within 3 months</td><td>In Progress</td><td><span class="pill bad">5.0 days</span></td></tr><tr><td>Thu 01 Oct, 11:48 AM</td><td>Nabeel S.<br><small><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13185839103" target="_blank" rel="noopener">Monday</a></small></td><td>Google ad</td><td>Edmonton area</td><td>Dental</td><td>1,500-3,000 sq. ft.</td><td>3-6 months</td><td>In Progress</td><td><span class="pill bad">5.1 days</span></td></tr></tbody></table></div>
+  <p class="note"><span class="pill mut">How</span><span>First contact = the moment the lead's Status on Monday first moved off "New", read from Monday's own history. Green within 1 hour, amber within 24 hours, red after that.</span></p></section><section class="panel" role="tabpanel" id="appts" aria-labelledby="t-appts" hidden>
+  <p class="note" style="margin-top:20px"><span class="pill mut">0 upcoming</span><span>2 with an outcome · 2 no-shows. Counted from Monday's Appointment Status column, which started on 14 Oct; earlier calls are only partly recorded, so the no-show rate shows once 5 outcomes are logged.</span></p>
+  <h3>Upcoming</h3>
+  <div class="tbl"><table class="kw"><thead><tr><th>When</th><th>Type</th><th>Status</th><th>Province</th><th>Clinic</th><th>Source</th><th>Reminder</th><th></th></tr></thead><tbody><tr><td colspan="8">No upcoming appointments on Monday yet.</td></tr></tbody></table></div>
+  <h3>Past and missed</h3>
+  <div class="tbl"><table class="kw"><thead><tr><th>When</th><th>Type</th><th>Status</th><th>Province</th><th>Clinic</th><th>Source</th><th>Reminder</th><th></th></tr></thead><tbody><tr><td>Date not set</td><td>Discovery Zoom</td><td><span class="pill bad">No-show</span></td><td>Alberta</td><td>Dental Clinic</td><td>Ad</td><td>Off</td><td><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13185839103" target="_blank" rel="noopener">Open</a></td></tr><tr><td>Date not set</td><td>Discovery Zoom</td><td><span class="pill bad">No-show</span></td><td>Alberta</td><td>Other Healthcare Space</td><td>Ad</td><td>Off</td><td><a href="https://riarh-group.monday.com/boards/18427834718/pulses/13190903685" target="_blank" rel="noopener">Open</a></td></tr></tbody></table></div>
+  <h3>How reminders work</h3>
+  <p>When Medico books a discovery Zoom on Monday (date and time, Zoom link, status Booked), the client gets a confirmation, a reminder 24 hours before and one 1 hour before. When a call is marked No-show, the client gets a "sorry we missed you" email that day and one follow-up a day later. Emails come from Medico's own address. Setting Reminder to Off stops them for that client.</p>
+  <p class="note"><span class="pill warn">Not live yet</span><span>Reminder emails start once Medico approves the copy and Gmail is connected. Setup steps and the 5 emails are on the Emails tab.</span></p></section><section class="panel" role="tabpanel" id="emails" aria-labelledby="t-emails" hidden>
+  <p class="note" style="margin-top:20px"><span class="pill warn">Not live yet</span><span>Nothing is sent to any client until every step below is done and Medico says go.</span></p>
+  <h2>Setup <small>7 steps · updates every hour</small></h2>
+  <div class="tbl"><table class="kw"><thead><tr><th class="n">#</th><th>Step</th><th>Who</th><th>Status</th></tr></thead><tbody><tr><td class="n">1</td><td>Appointment columns on the Monday lead board</td><td>ZippyScale</td><td><span class="pill good">Done</span></td></tr><tr><td class="n">2</td><td>Timing system that picks the moment each email is due</td><td>ZippyScale</td><td><span class="pill good">Done</span></td></tr><tr><td class="n">3</td><td>Email copy approved by Medico (0 of 5 approved)</td><td>Medico team</td><td><span class="pill warn">Waiting for review</span></td></tr><tr><td class="n">4</td><td>Connect info@medicoconstruction.com Gmail to Monday</td><td><b>Ameya</b></td><td><span class="pill warn">To do</span></td></tr><tr><td class="n">5</td><td>Build the 5 send automations on Monday (about 25 min)</td><td>ZippyScale</td><td><span class="pill warn">After step 4</span></td></tr><tr><td class="n">6</td><td>Test email to ZippyScale: time, time zone and Zoom link</td><td>ZippyScale</td><td><span class="pill warn">After step 5</span></td></tr><tr><td class="n">7</td><td>Switch reminders on</td><td>ZippyScale, on Medico's OK</td><td><span class="pill warn">Off</span></td></tr></tbody></table></div>
+  <h2 id="ameya">For Ameya <small>step 4 · about 2 minutes</small></h2>
+  <div class="howto"><ol>
+    <li>Log into monday.com as <b>info@medicoconstruction.com</b> (the Team Medico login). Please use this login, not your own.</li>
+    <li>Open the <b>Medico Lead Tracking</b> board.</li>
+    <li>Click <b>Automate</b> (top right), then <b>Create automation</b>.</li>
+    <li>Under "Then", search <b>email</b> and pick <b>Gmail: Send email</b>.</li>
+    <li>Click the red <b>Gmail icon</b>, then <b>+ Add new account</b>.</li>
+    <li>Sign in with the Google account <b>info@medicoconstruction.com</b> and click <b>Allow</b>.</li>
+    <li>Close the window without saving. The connection stays, and this step turns green here within the hour.</li></ol></div>
+  <h2>The 5 emails <small>from Monday · 0 of 5 approved</small></h2>
+  <p>Edit the copy right on the <a href="https://riarh-group.monday.com/boards/18435462885" target="_blank" rel="noopener">Medico Reminder Emails</a> board in Monday: change Subject or Email, or leave a suggestion as an update on the email. This page picks it up within the hour. When an email is ready, set its Copy status to <b>Approved</b>. Words in [brackets] fill in from the client's Monday item. Every email goes from info@medicoconstruction.com, so replies land in Medico's inbox.</p>
+  <div class="mails"><article class="mail"><header><b>1. Confirmation</b><span class="pill mut">Draft</span></header><p class="sub">Sends: About 1 minute after the call is set to Booked or Rescheduled</p><p class="subj">Subject: <b>Your call with Medico is confirmed</b></p><pre>Hi [Name],
+
+Thanks for making time to speak with us. Your call is confirmed.
+
+When: [Appointment]
+Join on Zoom: [Meeting Link]
+
+There&#x27;s nothing you need to prepare. On the call, we&#x27;ll walk you through how we&#x27;d plan your space, from design and permits to construction. If it&#x27;s a good fit, the next step is a no-cost site assessment.
+
+If this time no longer works, just reply to this email or call us at 604-644-4120.
+
+Warm regards,
+The Medico Construction &amp; Design team
+100+ healthcare projects | 15+ years | Licensed and insured
+Surrey | Victoria | Calgary | Edmonton
+604-644-4120 | medicoconstruction.com
+
+P.S. You can see some of the clinics we&#x27;ve built at medicoconstruction.com/portfolio</pre><footer><a href="https://riarh-group.monday.com/boards/18435462885/pulses/13289790872" target="_blank" rel="noopener">Edit or comment on Monday &#8599;</a></footer></article><article class="mail"><header><b>2. Day-before reminder</b><span class="pill mut">Draft</span></header><p class="sub">Sends: 24 hours before the call (skipped if booked less than a day ahead)</p><p class="subj">Subject: <b>Reminder: your call with Medico tomorrow</b></p><pre>Hi [Name],
+
+A quick reminder about your call with us tomorrow.
+
+When: [Appointment]
+Join on Zoom: [Meeting Link]
+
+If something has come up, reply to this email or call 604-644-4120. We&#x27;ll gladly move it to a better time.
+
+Talk soon,
+The Medico Construction &amp; Design team
+100+ healthcare projects | 15+ years | Licensed and insured
+Surrey | Victoria | Calgary | Edmonton
+604-644-4120 | medicoconstruction.com
+
+P.S. Design fees are $0 when Medico builds it.</pre><footer><a href="https://riarh-group.monday.com/boards/18435462885/pulses/13289825942" target="_blank" rel="noopener">Edit or comment on Monday &#8599;</a></footer></article><article class="mail"><header><b>3. 1-hour reminder</b><span class="pill mut">Draft</span></header><p class="sub">Sends: 1 hour before the call</p><p class="subj">Subject: <b>Your call with Medico starts in 1 hour</b></p><pre>Hi [Name],
+
+We&#x27;re looking forward to speaking with you in about an hour.
+
+Join on Zoom: [Meeting Link]
+
+If you&#x27;re running late or need a different time, please call us at 604-644-4120.
+
+See you soon,
+The Medico Construction &amp; Design team</pre><footer><a href="https://riarh-group.monday.com/boards/18435462885/pulses/13289859872" target="_blank" rel="noopener">Edit or comment on Monday &#8599;</a></footer></article><article class="mail"><header><b>4. Missed-call note</b><span class="pill mut">Draft</span></header><p class="sub">Sends: About 1 minute after the call is set to No-show</p><p class="subj">Subject: <b>Let&#x27;s find a time that works for you</b></p><pre>Hi [Name],
+
+We&#x27;re sorry we didn&#x27;t get to connect today. We know clinic days can get busy.
+
+We&#x27;d still be glad to talk about your project. Reply with a time that suits you, or call us at 604-644-4120, and we&#x27;ll set it up.
+
+Kind regards,
+The Medico Construction &amp; Design team
+100+ healthcare projects | 15+ years | Licensed and insured
+Surrey | Victoria | Calgary | Edmonton
+604-644-4120 | medicoconstruction.com
+
+P.S. In the meantime, here are some of the clinics we&#x27;ve built: medicoconstruction.com/portfolio</pre><footer><a href="https://riarh-group.monday.com/boards/18435462885/pulses/13289790108" target="_blank" rel="noopener">Edit or comment on Monday &#8599;</a></footer></article><article class="mail"><header><b>5. Gentle follow-up</b><span class="pill mut">Draft</span></header><p class="sub">Sends: 24 hours after a no-show, only if still No-show</p><p class="subj">Subject: <b>Here whenever you&#x27;re ready</b></p><pre>Hi [Name],
+
+Just following up on yesterday. Whenever the timing suits you, we&#x27;d be glad to set up a new call.
+
+Whether your project starts soon or later in the year, we&#x27;re happy to talk it through. Reply to this email or call 604-644-4120.
+
+Warm regards,
+The Medico Construction &amp; Design team
+100+ healthcare projects | 15+ years | Licensed and insured
+Surrey | Victoria | Calgary | Edmonton
+604-644-4120 | medicoconstruction.com
+
+P.S. Design fees are $0 when Medico builds it, and the first step is a no-cost site assessment.</pre><footer><a href="https://riarh-group.monday.com/boards/18435462885/pulses/13289860131" target="_blank" rel="noopener">Edit or comment on Monday &#8599;</a></footer></article></div>
+  <h3>Timing rules</h3>
+  <ul><li>Only discovery Zooms with a date, time and Zoom link get emails.</li><li>A rebooked client gets a new confirmation and the no-show follow-up stops.</li><li>After email 5, nothing more goes out automatically.</li><li>Setting Reminder to Off on a lead stops every email for that client.</li></ul></section><section class="panel" role="tabpanel" id="weekly" aria-labelledby="t-weekly" hidden>
+  <div class="tbl"><table class="kw">
+    <thead><tr><th>Week (Mon to Sun)</th><th class="n">Meta</th><th class="n">Google</th><th class="n">Total spend</th><th class="n">Clicks</th>
+    <th class="n">Meta leads</th><th class="n">Google leads</th><th class="n">Leads</th><th class="n">Cost / lead</th><th class="n">BC / AB</th><th class="n">Median contact</th></tr></thead>
+    <tbody><tr><td>12 Oct to 18 Oct</td><td class="n">CAD 162</td><td class="n">CAD 104</td><td class="n"><b>CAD 266</b></td><td class="n">52</td><td class="n">4</td><td class="n">0</td><td class="n"><b>4</b></td><td class="n">CAD 66.38</td><td class="n">3 / 1</td><td class="n">7.2 h</td></tr><tr><td>05 Oct to 11 Oct</td><td class="n">CAD 521</td><td class="n">CAD 240</td><td class="n"><b>CAD 761</b></td><td class="n">160</td><td class="n">3</td><td class="n">2</td><td class="n"><b>5</b></td><td class="n">CAD 152</td><td class="n">3 / 2</td><td class="n">21.3 h</td></tr><tr><td>28 Sep to 04 Oct</td><td class="n">CAD 372</td><td class="n">CAD 107</td><td class="n"><b>CAD 478</b></td><td class="n">194</td><td class="n">5</td><td class="n">2</td><td class="n"><b>7</b></td><td class="n">CAD 68.36</td><td class="n">1 / 6</td><td class="n">4.3 days</td></tr></tbody></table></div>
+  <p class="note"><span class="pill mut">Note</span><span>Leads are counted from Monday, once each. The current week fills in as it runs. Weeks start 30 Sep, when the new campaigns went live.</span></p></section><section class="panel" role="tabpanel" id="ads" aria-labelledby="t-ads" hidden>
+  <h2>Creative testing <small>Meta · since 30 Sep · live · leads from Monday</small></h2>
+  <div class="legend"><span>Live now</span><span class="p">Paused</span></div>
+  <div class="cgrid"><div class="cc"><img src="img/spacefound.jpg" alt="Found a space? Don&#x27;t sign yet"><div class="body"><div class="top"><h3>Found a space? Don&#x27;t sign yet</h3><span class="pill lime">Most leads</span></div><table class="ct"><thead><tr><th>Where</th><th>Spend</th><th>Views</th><th>CTR</th><th>Leads</th></tr></thead><tbody><tr class="on"><td>BC</td><td>120.93</td><td>3,669</td><td>0.95%</td><td>0</td></tr><tr class="off"><td>BC</td><td>94.70</td><td>2,880</td><td>0.69%</td><td class="lead">2</td></tr><tr class="off"><td>First test</td><td>51.58</td><td>10,133</td><td>0.49%</td><td>0</td></tr><tr class="off"><td>Alberta</td><td>27.00</td><td>741</td><td>0.13%</td><td>0</td></tr><tr class="off"><td>Job titles</td><td>21.19</td><td>629</td><td>0.00%</td><td>0</td></tr><tr class="on"><td>BC</td><td>16.71</td><td>371</td><td>0.00%</td><td>0</td></tr></tbody></table></div></div><div class="cc"><img src="img/expansion.jpg" alt="Expanding your clinic?"><div class="body"><div class="top"><h3>Expanding your clinic?</h3><span class="pill lime">Most leads</span></div><table class="ct"><thead><tr><th>Where</th><th>Spend</th><th>Views</th><th>CTR</th><th>Leads</th></tr></thead><tbody><tr class="off"><td>First test</td><td>52.54</td><td>7,655</td><td>0.39%</td><td class="lead">3</td></tr><tr class="off"><td>Alberta</td><td>47.53</td><td>1,151</td><td>0.61%</td><td>0</td></tr><tr class="off"><td>BC</td><td>11.96</td><td>450</td><td>0.22%</td><td>0</td></tr></tbody></table></div></div><div class="cc"><img src="img/ameya_ad3.jpg" alt="Opening a new clinic?"><div class="body"><div class="top"><h3>Opening a new clinic?</h3><span class="pill lime">Most leads</span></div><table class="ct"><thead><tr><th>Where</th><th>Spend</th><th>Views</th><th>CTR</th><th>Leads</th></tr></thead><tbody><tr class="off"><td>BC</td><td>102.14</td><td>4,041</td><td>0.62%</td><td>0</td></tr><tr class="on"><td>BC</td><td>101.35</td><td>3,780</td><td>0.53%</td><td class="lead">4</td></tr><tr class="on"><td>BC</td><td>15.86</td><td>609</td><td>0.66%</td><td>0</td></tr></tbody></table></div></div><div class="cc"><img src="img/ameya_ad5.jpg" alt="Still planning your buildout?"><div class="body"><div class="top"><h3>Still planning your buildout?</h3><span class="pill lime">Most leads</span></div><table class="ct"><thead><tr><th>Where</th><th>Spend</th><th>Views</th><th>CTR</th><th>Leads</th></tr></thead><tbody><tr class="on"><td>Alberta</td><td>69.52</td><td>2,108</td><td>0.85%</td><td class="lead">1</td></tr><tr class="off"><td>Alberta</td><td>32.85</td><td>1,051</td><td>0.86%</td><td class="lead">1</td></tr><tr class="off"><td>BC</td><td>16.74</td><td>541</td><td>0.92%</td><td>0</td></tr></tbody></table></div></div><div class="cc"><img src="img/design0.jpg" alt="$0 clinic design fees"><div class="body"><div class="top"><h3>$0 clinic design fees</h3><span class="pill good">1 lead</span></div><table class="ct"><thead><tr><th>Where</th><th>Spend</th><th>Views</th><th>CTR</th><th>Leads</th></tr></thead><tbody><tr class="off"><td>First test</td><td>54.20</td><td>6,130</td><td>0.44%</td><td class="lead">1</td></tr><tr class="off"><td>BC</td><td>47.70</td><td>1,360</td><td>0.88%</td><td>0</td></tr><tr class="off"><td>Alberta</td><td>21.72</td><td>768</td><td>0.26%</td><td>0</td></tr></tbody></table></div></div><div class="cc"><img src="img/design0_b.jpg" alt="Retargeting: $0 design, read first"><div class="body"><div class="top"><h3>Retargeting: $0 design, read first</h3><span class="pill mut">Testing</span></div><table class="ct"><thead><tr><th>Where</th><th>Spend</th><th>Views</th><th>CTR</th><th>Leads</th></tr></thead><tbody><tr class="off"><td>Retargeting</td><td>80.51</td><td>1,928</td><td>1.30%</td><td>0</td></tr></tbody></table></div></div><div class="cc"><img src="img/video_thumb.jpg" alt="Video: mistakes before you build"><div class="body"><div class="top"><h3>Video: mistakes before you build</h3><span class="pill mut">Testing</span></div><table class="ct"><thead><tr><th>Where</th><th>Spend</th><th>Views</th><th>CTR</th><th>Leads</th></tr></thead><tbody><tr class="off"><td>First test</td><td>53.43</td><td>1,407</td><td>1.71%</td><td>0</td></tr><tr class="off"><td>Retargeting</td><td>8.42</td><td>178</td><td>1.69%</td><td>0</td></tr><tr class="off"><td>BC</td><td>2.26</td><td>37</td><td>0.00%</td><td>0</td></tr><tr class="off"><td>Alberta</td><td>0.23</td><td>7</td><td>0.00%</td><td>0</td></tr></tbody></table></div></div></div>
+  <p class="note"><span class="pill mut">Rule</span><span>Ads are cut on click rate after 4,000 views, not on cost per lead: at this budget a single lead can halve or double a cost per lead.</span></p>
+  <h2>Which angle is winning <small>Meta · all placements combined · live</small></h2>
+  <div class="tbl"><table class="kw"><thead><tr><th>Angle</th><th>Type</th><th class="n">Spend</th><th class="n">Views</th><th class="n">CTR</th><th class="n">Leads</th><th class="n">Cost / lead</th></tr></thead><tbody><tr><td><b>Found a space? Don&#x27;t sign yet</b> <span class="pill good">Live</span></td><td>Names the situation</td><td class="n">332.11</td><td class="n">18,423</td><td class="n">0.58%</td><td class="n"><b>2</b></td><td class="n">166.05</td></tr><tr><td><b>Expanding your clinic?</b></td><td>Names the situation</td><td class="n">112.03</td><td class="n">9,256</td><td class="n">0.41%</td><td class="n"><b>3</b></td><td class="n">37.34</td></tr><tr><td><b>Opening a new clinic?</b> <span class="pill good">Live</span></td><td>Names the situation</td><td class="n">219.35</td><td class="n">8,430</td><td class="n">0.58%</td><td class="n"><b>4</b></td><td class="n">54.84</td></tr><tr><td><b>Still planning your buildout?</b> <span class="pill good">Live</span></td><td>Names the situation</td><td class="n">119.11</td><td class="n">3,700</td><td class="n">0.86%</td><td class="n"><b>2</b></td><td class="n">59.55</td></tr><tr><td><b>$0 clinic design fees</b></td><td>Offer only</td><td class="n">123.62</td><td class="n">8,258</td><td class="n">0.50%</td><td class="n"><b>1</b></td><td class="n">123.62</td></tr><tr><td><b>Retargeting: $0 design, read first</b></td><td>Offer only (retargeting)</td><td class="n">80.51</td><td class="n">1,928</td><td class="n">1.30%</td><td class="n"><b>0</b></td><td class="n">n/a</td></tr><tr><td><b>Video: mistakes before you build</b></td><td>Tips</td><td class="n">64.34</td><td class="n">1,629</td><td class="n">1.66%</td><td class="n"><b>0</b></td><td class="n">n/a</td></tr></tbody></table></div>
+  <div class="win"><div><span class="eyebrow">Winning angle so far</span><b>Name the clinic owner's situation</b><span>Ads that open with where the owner is right now brought 11 of the 12 Meta leads.</span></div>
+  <div><span class="eyebrow">Message we scale</span><b>Situation hook → no-cost site assessment → $0 design when Medico builds → 100+ healthcare projects</b><span>Every new creative keeps this order. Only the situation in the opening line changes.</span></div></div>
+  <h2>Creative fatigue <small>live ads · last 7 days</small></h2>
+  <div class="fat"><div><b>Still planning your buildout? · Alberta</b><span class="big">67%</span><div class="gauge"><i style="width:67%;background:var(--warn)"></i></div><span>2.00 views per person in 7 days · refresh at 3</span><span>Click rate: 0.85% last 7 days, 0.85% since launch</span></div><div><b>Found a space? Don&#x27;t sign yet · BC</b><span class="big">59%</span><div class="gauge"><i style="width:59%;background:var(--good)"></i></div><span>1.76 views per person in 7 days · refresh at 3</span><span>Click rate: 0.95% last 7 days, 0.95% since launch</span></div><div><b>Opening a new clinic? · BC</b><span class="big">58%</span><div class="gauge"><i style="width:58%;background:var(--good)"></i></div><span>1.74 views per person in 7 days · refresh at 3</span><span>Click rate: 0.53% last 7 days, 0.53% since launch</span></div><div><b>Opening a new clinic? · BC</b><span class="big">43%</span><div class="gauge"><i style="width:43%;background:var(--good)"></i></div><span>1.28 views per person in 7 days · refresh at 3</span><span>Click rate: 0.66% last 7 days, 0.66% since launch</span></div><div><b>Found a space? Don&#x27;t sign yet · BC</b><span class="big">41%</span><div class="gauge"><i style="width:41%;background:var(--good)"></i></div><span>1.24 views per person in 7 days · refresh at 3</span><span>Click rate: 0.00% last 7 days, 0.00% since launch</span></div></div>
+  <p class="note"><span class="pill mut">How</span><span>Fatigue % = views per person in the last 7 days divided by the refresh line (3 for new audiences, 5 for retargeting). 100% means replace the ad.</span></p>
+  <p class="note" style="margin-top:28px"><span class="pill warn">Written 8 Oct</span><span>The sections below are our written analysis from 8 Oct, not live numbers. Live numbers are above and on the other tabs.</span></p>
+  <h2>Why Meta's cost per lead is high <small>1 to 5 Oct · day 1 excluded (Audience Network, since removed)</small></h2>
+  <div class="funnel">
+    <div><span class="eyebrow">Views</span><b>11,840</b><span>CAD 30.53 per 1,000</span><span class="pill good">Normal for Canada</span></div>
+    <div><span class="eyebrow">Clicks</span><b>97</b><span>0.82% click rate</span><span class="pill bad">Main problem</span></div>
+    <div><span class="eyebrow">Reached page</span><b>90</b><span>93% of clicks</span><span class="pill good">Healthy</span></div>
+    <div><span class="eyebrow">Leads</span><b>6</b><span>6.7% of visitors</span><span class="pill good">At benchmark (6.2%)</span></div>
+  </div>
+  <div class="splits">
+    <div class="split">
+      <h3>Click rate by day: falling 49%</h3>
+      <div class="days" aria-label="Click rate by day">
+        <div class="day"><b>1.15%</b><i style="height:96px;background:var(--fg)"></i>1 Oct</div>
+        <div class="day"><b>0.91%</b><i style="height:76px;background:var(--fg)"></i>2 Oct</div>
+        <div class="day"><b>0.79%</b><i style="height:66px;background:var(--fg)"></i>3 Oct</div>
+        <div class="day"><b>0.63%</b><i style="height:53px;background:var(--warn)"></i>4 Oct</div>
+        <div class="day"><b>0.59%</b><i style="height:49px;background:var(--bad)"></i>5 Oct</div>
+      </div>
+    </div>
+    <div class="split">
+      <h3>What we changed</h3>
+      <ul class="fix">
+        <li><span class="pill good">Done 6 Oct</span>2 new situation-led ads live (click rate fell over 30%: new creative is the fix)</li>
+        <li><span class="pill good">Done 6 Oct</span>CAD 10/day moved Alberta → BC (BC 45, Alberta 15)</li>
+        <li><span class="pill good">Done 6 Oct</span>Alberta "$0 design" paused: CAD 15/day reads 1 to 2 ads, not 3</li>
+        <li><span class="pill good">Done 8 Oct</span>"Opening a new clinic?" (BC) took CAD 91 at 0.64% clicks, 0 leads: a rule pauses it at 4,000 views (today). "Still planning?" added to BC</li>
+        <li><span class="pill good">Done 8 Oct</span>Alberta runs "Still planning?" only (1 lead on CAD 5). "Expanding" paused there</li>
+        <li><span class="pill good">Done 8 Oct</span>Retargeting paused (CAD 72 in 7 days, 0 leads). Its CAD 10/day funds a job-title test</li>
+        <li><span class="pill warn">Next</span>Send "qualified lead" from Monday back to Meta so it finds more leads like your best ones</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Scale plan</h2>
+  <div class="week">
+    <div><span class="d">1</span><span class="who">Message</span><span>Every new ad opens with a situation: expanding, found a space, have the space, opening, still planning. "$0 design" becomes the closing line, not the headline.</span></div>
+    <div><span class="d">2</span><span class="who">Budget</span><span>When the 4,000-view cut pauses an ad, its slot and budget go to the next situation-led creative. Total stays CAD 70 a day until 28 Oct: BC 45, Alberta 15, job-title test 10.</span></div>
+    <div><span class="d">3</span><span class="who">BC</span><span>"Found a space", "$0 design" and "Still planning?" live. The expansion angle comes back to BC as the video.</span></div>
+    <div><span class="d">4</span><span class="who">Alberta</span><span>"Still planning?" alone at CAD 15/day (1 ad is what that budget can read). "Expanding" and "$0 design" paused there.</span></div>
+    <div><span class="d">5</span><span class="who">Refresh</span><span>A new situation-led creative goes into each province before any live ad passes 3 views per person in 7 days.</span></div>
+  </div>
+
+  <h2>Targeting and automatic rules <small>updated 8 Oct</small></h2>
+  <div class="tl">
+    <div><b>BC (CAD 45/day)</b>People who live in or often visit Metro Vancouver and the Fraser Valley (75 km around Surrey), Victoria (50 km) and Nanaimo (35 km). Age 25 to 65. Broad: the ad picks out the clinic owner.</div>
+    <div><b>Alberta (CAD 15/day)</b>50 km around Calgary and Edmonton. Same settings as BC.</div>
+    <div><b>Job-title test (CAD 10/day, new 8 Oct)</b>Only people listing a clinic job: dentist, pharmacist, medical doctor, chiropractor owner, vet. BC and Alberta, about 1,000 people. Same "Found a space" ad as broad BC, so we see which audience clicks more after 4,000 views.</div>
+    <div><b>Always excluded</b>Everyone who has already sent a lead. Facebook and Instagram only, no US.</div>
+    <div><b>Rule: cut</b>Checks every 30 minutes. Any cold ad past 4,000 views with a click rate under 0.5% is paused.</div>
+    <div><b>Rule: fatigue</b>Checks daily. Alert when an ad set's people see the ads more than 3 times in 7 days.</div>
+  </div>
+
+  <h2>Creative pipeline <small>new creatives, same winning message</small></h2>
+  <div class="tgrid">
+    <div class="tc">
+      <img src="img/ameya_ad3.jpg" alt="Ameya design: Opening a New Clinic?">
+      <div class="body"><span class="pill warn" style="justify-self:start">Tested 6 to 8 Oct · BC · 0.64% clicks, cut at 4,000 views</span><b>Opening a new clinic?</b><span class="mut">Angle: situation (new practice)</span></div>
+    </div>
+    <div class="tc">
+      <img src="img/ameya_ad5.jpg" alt="Ameya design: Still Planning Your Clinic Buildout?">
+      <div class="body"><span class="pill good" style="justify-self:start">Live · Alberta 6 Oct, BC 8 Oct</span><b>Still planning your buildout?</b><span class="mut">Angle: situation (budget not set)</span></div>
+    </div>
+    <div class="tc">
+      <div class="ph">Your clinic is full. Now what?</div>
+      <div class="body"><span class="pill warn" style="justify-self:start">Ameya · by 13 Oct</span><b>Expansion, new static</b><span class="mut">Angle: winner (expansion), new image</span></div>
+    </div>
+    <div class="tc">
+      <div class="ph">Already have the space for your clinic?</div>
+      <div class="body"><span class="pill warn" style="justify-self:start">Ameya · by 13 Oct</span><b>You have the space. Now what?</b><span class="mut">Angle: situation (lease signed). 5 of 8 leads already have a location</span></div>
+    </div>
+    <div class="tc">
+      <div class="ph">Adding exam rooms?<br><span style="font:500 13px var(--body)">30s phone video</span></div>
+      <div class="body"><span class="pill warn" style="justify-self:start">Film by 20 Oct · both</span><b>Video: expansion</b><span class="mut">Angle: winner (expansion), script ready</span></div>
+    </div>
+    <div class="tc">
+      <div class="ph">Found a space? Don't sign yet.<br><span style="font:500 13px var(--body)">30s phone video</span></div>
+      <div class="body"><span class="pill warn" style="justify-self:start">Film by 20 Oct · BC</span><b>Video: space found</b><span class="mut">Angle: winner in BC, script ready</span></div>
+    </div>
+    <div class="tc">
+      <div class="ph">Opening an optometry clinic?</div>
+      <div class="body"><span class="pill mut" style="justify-self:start">Ameya · by 20 Oct</span><b>Optometry clinics</b><span class="mut">Angle: situation + clinic type. Biggest group in Medico's portfolio</span></div>
+    </div>
+  </div>
+</section><section class="panel" role="tabpanel" id="google" aria-labelledby="t-google" hidden>
+  <div class="kpis">
+    <div class="kpi hero"><b>4</b><span>Google leads on Monday since 30 Sep</span></div>
+    <div class="kpi"><b>CAD 113</b><span>Cost per Google lead</span></div>
+    <div class="kpi"><b>CAD 451</b><span>Google spend since 30 Sep</span></div>
+    <div class="kpi"><b>CAD 5.24</b><span>Average cost per click (86 clicks)</span></div>
+  </div>
+  <h2>Campaigns <small>since 30 Sep · live · leads = Google conversions (3); Monday is the true count</small></h2>
+  <div class="tbl"><table class="kw"><thead><tr><th>Campaign</th><th class="n">Budget / day</th><th class="n">Max per click</th><th class="n">Spend</th><th class="n">Views</th><th class="n">Clicks</th><th class="n">Per click</th><th class="n">Leads</th><th class="n">Shown for</th><th>Why ads miss searches</th></tr></thead><tbody><tr><td>Clinic Design</td><td class="n">CAD 15.00</td><td class="n">CAD 12.00</td><td class="n">CAD 196</td><td class="n">247</td><td class="n">30</td><td class="n">CAD 6.54</td><td class="n"><b>1</b></td><td class="n">53%</td><td><span class="pill warn">Bid too low for some searches</span></td></tr><tr><td>Clinic Build</td><td class="n">CAD 9.00</td><td class="n">CAD 14.40</td><td class="n">CAD 124</td><td class="n">400</td><td class="n">15</td><td class="n">CAD 8.28</td><td class="n"><b>2</b></td><td class="n">57%</td><td><span class="pill warn">Bid too low for some searches</span></td></tr><tr><td>Dental</td><td class="n">CAD 8.00</td><td class="n">CAD 12.00</td><td class="n">CAD 79.42</td><td class="n">71</td><td class="n">11</td><td class="n">CAD 7.22</td><td class="n">0</td><td class="n">73%</td><td><span class="pill warn">Daily budget runs out</span></td></tr><tr><td>Brand</td><td class="n">CAD 5.00</td><td class="n">CAD 5.00</td><td class="n">CAD 50.95</td><td class="n">101</td><td class="n">30</td><td class="n">CAD 1.70</td><td class="n">0</td><td class="n">95%</td><td><span class="pill good">Showing for most searches</span></td></tr></tbody></table></div>
+  <p class="note"><span class="pill mut">How</span><span>"Shown for" = the share of matching searches where our ad appeared. With about 2 leads a week, judge Google on the 28 days to 28 Oct, not day to day. No bid changes before 21 Oct.</span></p>
+  <p class="note"><span class="pill mut">More</span><span>Keywords, what people searched and the blocked words are on the Keywords tab.</span></p></section><section class="panel" role="tabpanel" id="keywords" aria-labelledby="t-keywords" hidden>
+  <h2>Google keywords <small>since 30 Sep · live · 52 keywords shown at least once · leads = Google conversions</small></h2>
+  <div class="tbl"><table class="kw"><thead><tr><th>Keyword</th><th class="n">Views</th><th class="n">Clicks</th><th class="n">Cost</th><th class="n">Leads</th><th>Status</th></tr></thead><tbody><tr class="grp"><td colspan="6">Clinic Design · 247 views · CAD 196 · 1 lead</td></tr><tr><td>dental clinic design <small class="mut">phrase</small></td><td class="n">38</td><td class="n">3</td><td class="n">14.61</td><td class="n"><b>1</b></td><td><span class="pill lime">Lead</span></td></tr><tr><td>medical office design <small class="mut">phrase</small></td><td class="n">24</td><td class="n">7</td><td class="n">40.13</td><td class="n">0</td><td><span class="pill good">Clicks</span></td></tr><tr><td>healthcare interior design <small class="mut">phrase</small></td><td class="n">64</td><td class="n">6</td><td class="n">49.21</td><td class="n">0</td><td><span class="pill good">Clicks</span></td></tr><tr><td>dental clinic interior design <small class="mut">phrase</small></td><td class="n">40</td><td class="n">4</td><td class="n">23.90</td><td class="n">0</td><td><span class="pill good">Clicks</span></td></tr><tr><td>clinic design <small class="mut">phrase</small></td><td class="n">16</td><td class="n">2</td><td class="n">19.38</td><td class="n">0</td><td><span class="pill good">Clicks</span></td></tr><tr><td>pharmacy design <small class="mut">phrase</small></td><td class="n">9</td><td class="n">2</td><td class="n">7.62</td><td class="n">0</td><td><span class="pill good">Clicks</span></td></tr><tr><td>pharmacy design <small class="mut">exact</small></td><td class="n">2</td><td class="n">2</td><td class="n">10.88</td><td class="n">0</td><td><span class="pill good">Clicks</span></td></tr><tr><td>vet clinic design <small class="mut">phrase</small></td><td class="n">20</td><td class="n">1</td><td class="n">6.94</td><td class="n">0</td><td><span class="pill good">Clicks</span></td></tr><tr><td>dental office design <small class="mut">exact</small></td><td class="n">9</td><td class="n">1</td><td class="n">10.57</td><td class="n">0</td><td><span class="pill good">Clicks</span></td></tr><tr><td>dental clinic design <small class="mut">exact</small></td><td class="n">6</td><td class="n">1</td><td class="n">7.78</td><td class="n">0</td><td><span class="pill good">Clicks</span></td></tr><tr><td>clinic design <small class="mut">exact</small></td><td class="n">2</td><td class="n">1</td><td class="n">5.27</td><td class="n">0</td><td><span class="pill good">Clicks</span></td></tr><tr><td>optometry office design <small class="mut">phrase</small></td><td class="n">7</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>clinic interior design <small class="mut">phrase</small></td><td class="n">2</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>dental clinic architect <small class="mut">exact</small></td><td class="n">2</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>dental office interior design <small class="mut">phrase</small></td><td class="n">1</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>medical clinic design <small class="mut">exact</small></td><td class="n">1</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>medical office interior design <small class="mut">phrase</small></td><td class="n">1</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>dental operatory design <small class="mut">phrase</small></td><td class="n">1</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>clinic interior design <small class="mut">exact</small></td><td class="n">1</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>optometry clinic design <small class="mut">phrase</small></td><td class="n">1</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr class="grp"><td colspan="6">Clinic Build · 400 views · CAD 124 · 2 leads</td></tr><tr><td>medical construction <small class="mut">phrase</small></td><td class="n">74</td><td class="n">5</td><td class="n">36.92</td><td class="n"><b>2</b></td><td><span class="pill lime">Lead</span></td></tr><tr><td>medical clinic set up <small class="mut">phrase</small></td><td class="n">91</td><td class="n">4</td><td class="n">22.78</td><td class="n">0</td><td><span class="pill good">Clicks</span></td></tr><tr><td>medical clinic setup <small class="mut">phrase</small></td><td class="n">91</td><td class="n">3</td><td class="n">30.47</td><td class="n">0</td><td><span class="pill good">Clicks</span></td></tr><tr><td>clinic design build <small class="mut">phrase</small></td><td class="n">37</td><td class="n">1</td><td class="n">10.92</td><td class="n">0</td><td><span class="pill good">Clicks</span></td></tr><tr><td>medical clinic construction <small class="mut">phrase</small></td><td class="n">21</td><td class="n">1</td><td class="n">11.47</td><td class="n">0</td><td><span class="pill good">Clicks</span></td></tr><tr><td>clinic construction <small class="mut">exact</small></td><td class="n">1</td><td class="n">1</td><td class="n">11.63</td><td class="n">0</td><td><span class="pill good">Clicks</span></td></tr><tr><td>build a medical clinic <small class="mut">phrase</small></td><td class="n">24</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>medical office contractors <small class="mut">phrase</small></td><td class="n">20</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>medical clinic renovation <small class="mut">phrase</small></td><td class="n">11</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>veterinary clinic construction <small class="mut">phrase</small></td><td class="n">9</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>medical office construction <small class="mut">phrase</small></td><td class="n">8</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>veterinary clinic construction <small class="mut">exact</small></td><td class="n">3</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>clinic construction company <small class="mut">exact</small></td><td class="n">3</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>pharmacy renovation <small class="mut">exact</small></td><td class="n">2</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>medical clinic renovation <small class="mut">exact</small></td><td class="n">2</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>pharmacy construction <small class="mut">phrase</small></td><td class="n">1</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>clinic renovation <small class="mut">exact</small></td><td class="n">1</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>clinic builders <small class="mut">exact</small></td><td class="n">1</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr class="grp"><td colspan="6">Dental · 71 views · CAD 79.42 · 0 leads</td></tr><tr><td>dental construction <small class="mut">phrase</small></td><td class="n">49</td><td class="n">9</td><td class="n">65.16</td><td class="n">0</td><td><span class="pill good">Clicks</span></td></tr><tr><td>dental office renovation <small class="mut">phrase</small></td><td class="n">10</td><td class="n">2</td><td class="n">14.26</td><td class="n">0</td><td><span class="pill good">Clicks</span></td></tr><tr><td>turnkey dental office <small class="mut">phrase</small></td><td class="n">3</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>dental clinic renovation <small class="mut">exact</small></td><td class="n">2</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>dental clinic building <small class="mut">exact</small></td><td class="n">2</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>dental clinic construction <small class="mut">phrase</small></td><td class="n">1</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>dental office renovation <small class="mut">exact</small></td><td class="n">1</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>dental clinic construction <small class="mut">exact</small></td><td class="n">1</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>building a dental office <small class="mut">exact</small></td><td class="n">1</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr><td>dental clinic builders <small class="mut">exact</small></td><td class="n">1</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr><tr class="grp"><td colspan="6">Brand · 101 views · CAD 50.95 · 0 leads</td></tr><tr><td>medico construction <small class="mut">phrase</small></td><td class="n">78</td><td class="n">26</td><td class="n">38.96</td><td class="n">0</td><td><span class="pill good">Clicks</span></td></tr><tr><td>medico construction and design <small class="mut">phrase</small></td><td class="n">16</td><td class="n">3</td><td class="n">8.66</td><td class="n">0</td><td><span class="pill good">Clicks</span></td></tr><tr><td>medico construction &amp; design <small class="mut">exact</small></td><td class="n">6</td><td class="n">1</td><td class="n">3.33</td><td class="n">0</td><td><span class="pill good">Clicks</span></td></tr><tr><td>medicoconstruction.com <small class="mut">phrase</small></td><td class="n">1</td><td class="n">0</td><td class="n">0.00</td><td class="n">0</td><td><span class="pill mut">Watching</span></td></tr></tbody></table></div>
+  <h2>What people searched <small>since 30 Sep · live · searches with at least 1 click · leads = Google conversions</small></h2>
+  <div class="tbl"><table class="kw"><thead><tr><th>Search</th><th>Campaign</th><th class="n">Clicks</th><th class="n">Cost</th><th class="n">Leads</th><th>Status</th></tr></thead><tbody><tr><td>medico construction</td><td>Brand</td><td class="n">25</td><td class="n">34.00</td><td class="n">0</td><td><span class="pill good">Is a keyword</span></td></tr><tr><td>best medical clinic design</td><td>Clinic Design</td><td class="n">3</td><td class="n">13.66</td><td class="n">0</td><td><span class="pill mut">Matched</span></td></tr><tr><td>pharmacy design</td><td>Clinic Design</td><td class="n">2</td><td class="n">10.88</td><td class="n">0</td><td><span class="pill good">Is a keyword</span></td></tr><tr><td>medico construction and design</td><td>Brand</td><td class="n">2</td><td class="n">4.35</td><td class="n">0</td><td><span class="pill good">Is a keyword</span></td></tr><tr><td>clinic construction</td><td>Clinic Build</td><td class="n">1</td><td class="n">11.63</td><td class="n">0</td><td><span class="pill good">Is a keyword</span></td></tr><tr><td>modern clinic design</td><td>Clinic Build</td><td class="n">1</td><td class="n">10.92</td><td class="n">0</td><td><span class="pill mut">Matched</span></td></tr><tr><td>dental office design</td><td>Clinic Design</td><td class="n">1</td><td class="n">10.57</td><td class="n">0</td><td><span class="pill good">Is a keyword</span></td></tr><tr><td>healthcare design projects</td><td>Clinic Design</td><td class="n">1</td><td class="n">8.50</td><td class="n">0</td><td><span class="pill mut">Matched</span></td></tr><tr><td>dental clinic design</td><td>Clinic Design</td><td class="n">1</td><td class="n">7.78</td><td class="n">0</td><td><span class="pill good">Is a keyword</span></td></tr><tr><td>clinic opening</td><td>Clinic Build</td><td class="n">1</td><td class="n">7.14</td><td class="n">0</td><td><span class="pill mut">Matched</span></td></tr><tr><td>medical clinic interior</td><td>Clinic Design</td><td class="n">1</td><td class="n">5.27</td><td class="n">0</td><td><span class="pill mut">Matched</span></td></tr><tr><td>healthcare interior design</td><td>Clinic Design</td><td class="n">1</td><td class="n">5.04</td><td class="n">0</td><td><span class="pill good">Is a keyword</span></td></tr><tr><td>medico construction &amp; design</td><td>Brand</td><td class="n">1</td><td class="n">3.33</td><td class="n">0</td><td><span class="pill good">Is a keyword</span></td></tr><tr><td>dental office contractors</td><td>Dental</td><td class="n">1</td><td class="n">0.70</td><td class="n">0</td><td><span class="pill mut">Matched</span></td></tr></tbody></table></div>
+  <p class="note"><span class="pill mut">Note</span><span>Google hides rare searches, so this list is part of the traffic, not all of it.</span></p>
+  <h2>Searches we block <small>live · 224 words and phrases · Clinic Design 80 · Clinic Build 63 · Dental 62 · Brand 19</small></h2>
+  <p class="note"><span class="pill mut">Why</span><span>Ads never show for searches with these words: jobs, homes, decor, how-to guides, other trades. Tap a campaign to see its list.</span></p>
+  <div class="negs"><details><summary>Clinic Design · 80 blocked</summary><div class="chips"><span class="chip">archdaily</span><span class="chip">autocad</span><span class="chip">best</span><span class="chip">building construction</span><span class="chip">cabinet</span><span class="chip">cabinets</span><span class="chip">career</span><span class="chip">careers</span><span class="chip">commercial contractor</span><span class="chip">commercial contractors</span><span class="chip">construction</span><span class="chip">construction companies</span><span class="chip">construction company</span><span class="chip">course</span><span class="chip">decor</span><span class="chip">decoration</span><span class="chip">diy</span><span class="chip">dvm360</span><span class="chip">floor plan</span><span class="chip">floor plans</span><span class="chip">flooring</span><span class="chip">for lease</span><span class="chip">for sale</span><span class="chip">franchise</span><span class="chip">general contractor</span><span class="chip">general contractors</span><span class="chip">guide</span><span class="chip">guideline</span><span class="chip">guidelines</span><span class="chip">guides</span><span class="chip">hospital building design</span><span class="chip">hospital construction</span><span class="chip">hospital design</span><span class="chip">hospital design architecture</span><span class="chip">hospital floor plan</span><span class="chip">house</span><span class="chip">how to</span><span class="chip">idea</span><span class="chip">ideas</span><span class="chip">image</span><span class="chip">images</span><span class="chip">incorporate</span><span class="chip">incorporating</span><span class="chip">job</span><span class="chip">jobs</span><span class="chip">medical construction and design</span><span class="chip">mural</span><span class="chip">murals</span><span class="chip">office fit out</span><span class="chip">ontario</span><span class="chip">pdf</span><span class="chip">pharma</span><span class="chip">pharmaceutical</span><span class="chip">picture</span><span class="chip">pictures</span><span class="chip">prequalified</span><span class="chip">projects</span><span class="chip">rent</span><span class="chip">rental</span><span class="chip">requirement</span><span class="chip">requirements</span><span class="chip">residential</span><span class="chip">restaurant</span><span class="chip">revit</span><span class="chip">salary</span><span class="chip">school</span><span class="chip">shelving</span><span class="chip">sketchup</span><span class="chip">small hospital</span><span class="chip">software</span><span class="chip">student</span><span class="chip">template</span><span class="chip">templates</span><span class="chip">tenant improvement</span><span class="chip">thesis</span><span class="chip">toronto</span><span class="chip">trauma</span><span class="chip">warehouse</span><span class="chip">website</span><span class="chip">websites</span></div></details><details><summary>Clinic Build · 63 blocked</summary><div class="chips"><span class="chip">archdaily</span><span class="chip">architect</span><span class="chip">architecture</span><span class="chip">building construction</span><span class="chip">cabinet</span><span class="chip">cabinets</span><span class="chip">career</span><span class="chip">careers</span><span class="chip">commercial contractor</span><span class="chip">commercial contractors</span><span class="chip">construction</span><span class="chip">construction companies</span><span class="chip">construction company</span><span class="chip">course</span><span class="chip">dental</span><span class="chip">diy</span><span class="chip">floor plan</span><span class="chip">floor plans</span><span class="chip">flooring</span><span class="chip">for lease</span><span class="chip">for sale</span><span class="chip">franchise</span><span class="chip">general contractor</span><span class="chip">general contractors</span><span class="chip">guideline</span><span class="chip">guidelines</span><span class="chip">hospital building design</span><span class="chip">hospital construction</span><span class="chip">hospital design</span><span class="chip">hospital design architecture</span><span class="chip">hospital floor plan</span><span class="chip">house</span><span class="chip">how to</span><span class="chip">idea</span><span class="chip">ideas</span><span class="chip">image</span><span class="chip">images</span><span class="chip">incorporate</span><span class="chip">incorporating</span><span class="chip">job</span><span class="chip">jobs</span><span class="chip">medical construction and design</span><span class="chip">office fit out</span><span class="chip">ontario</span><span class="chip">pdf</span><span class="chip">pharma</span><span class="chip">pharmaceutical</span><span class="chip">picture</span><span class="chip">pictures</span><span class="chip">prequalified</span><span class="chip">rent</span><span class="chip">rental</span><span class="chip">requirement</span><span class="chip">requirements</span><span class="chip">residential</span><span class="chip">restaurant</span><span class="chip">salary</span><span class="chip">school</span><span class="chip">shelving</span><span class="chip">small hospital</span><span class="chip">tenant improvement</span><span class="chip">toronto</span><span class="chip">warehouse</span></div></details><details><summary>Dental · 62 blocked</summary><div class="chips"><span class="chip">archdaily</span><span class="chip">architect</span><span class="chip">architecture</span><span class="chip">building construction</span><span class="chip">cabinet</span><span class="chip">cabinets</span><span class="chip">career</span><span class="chip">careers</span><span class="chip">commercial contractor</span><span class="chip">commercial contractors</span><span class="chip">construction</span><span class="chip">construction companies</span><span class="chip">construction company</span><span class="chip">course</span><span class="chip">diy</span><span class="chip">floor plan</span><span class="chip">floor plans</span><span class="chip">flooring</span><span class="chip">for lease</span><span class="chip">for sale</span><span class="chip">franchise</span><span class="chip">general contractor</span><span class="chip">general contractors</span><span class="chip">guideline</span><span class="chip">guidelines</span><span class="chip">hospital building design</span><span class="chip">hospital construction</span><span class="chip">hospital design</span><span class="chip">hospital design architecture</span><span class="chip">hospital floor plan</span><span class="chip">house</span><span class="chip">how to</span><span class="chip">idea</span><span class="chip">ideas</span><span class="chip">image</span><span class="chip">images</span><span class="chip">incorporate</span><span class="chip">incorporating</span><span class="chip">job</span><span class="chip">jobs</span><span class="chip">medical construction and design</span><span class="chip">office fit out</span><span class="chip">ontario</span><span class="chip">pdf</span><span class="chip">pharma</span><span class="chip">pharmaceutical</span><span class="chip">picture</span><span class="chip">pictures</span><span class="chip">prequalified</span><span class="chip">rent</span><span class="chip">rental</span><span class="chip">requirement</span><span class="chip">requirements</span><span class="chip">residential</span><span class="chip">restaurant</span><span class="chip">salary</span><span class="chip">school</span><span class="chip">shelving</span><span class="chip">small hospital</span><span class="chip">tenant improvement</span><span class="chip">toronto</span><span class="chip">warehouse</span></div></details><details><summary>Brand · 19 blocked</summary><div class="chips"><span class="chip">address</span><span class="chip">apprenticeship</span><span class="chip">career</span><span class="chip">careers</span><span class="chip">complaints</span><span class="chip">directions</span><span class="chip">employment</span><span class="chip">hiring</span><span class="chip">internship</span><span class="chip">job</span><span class="chip">jobs</span><span class="chip">lawsuit</span><span class="chip">map</span><span class="chip">maps</span><span class="chip">phone number</span><span class="chip">resume</span><span class="chip">reviews</span><span class="chip">salary</span><span class="chip">wage</span></div></details></div></section><section class="panel" role="tabpanel" id="page" aria-labelledby="t-page" hidden>
+  <p class="note" style="margin-top:28px"><span class="pill warn">Written 8 Oct</span><span>The sections below are our written analysis from 8 Oct, not live numbers. Live numbers are on the other tabs.</span></p>
+  <h2>The landing page changes with every ad <small>tap any card to see it live</small></h2>
+  <p class="note" style="margin-top:0"><span class="pill mut">How</span><span>Google ad groups send each keyword group to its own version (clinic type headline, a real Medico project photo, cost question). Meta ads pass their ad ID, and the headline continues that ad's hook.</span></p>
+  <h3 style="margin:14px 0 10px">Google: by keyword group</h3>
+  <div class="strip">
+    <a class="shot" href="https://build.medicoconstruction.com/?v=medical" target="_blank" rel="noopener"><img src="img/lp-default.jpg" alt="Medical clinic version"><span>Medical clinic<small>?v=medical</small></span></a>
+    <a class="shot" href="https://build.medicoconstruction.com/?v=dental" target="_blank" rel="noopener"><img src="img/lp-dental.jpg" alt="Dental version"><span>Dental<small>?v=dental</small></span></a>
+    <a class="shot" href="https://build.medicoconstruction.com/?v=optometry" target="_blank" rel="noopener"><img src="img/lp-optometry.jpg" alt="Optometry version"><span>Optometry<small>?v=optometry</small></span></a>
+    <a class="shot" href="https://build.medicoconstruction.com/?v=pharmacy" target="_blank" rel="noopener"><img src="img/lp-pharmacy.jpg" alt="Pharmacy version"><span>Pharmacy<small>?v=pharmacy</small></span></a>
+    <a class="shot" href="https://build.medicoconstruction.com/?v=vet" target="_blank" rel="noopener"><img src="img/lp-vet.jpg" alt="Veterinary version"><span>Veterinary<small>?v=vet</small></span></a>
+  </div>
+  <h3 style="margin:18px 0 10px">Meta: by ad clicked</h3>
+  <div class="strip">
+    <a class="shot" href="https://build.medicoconstruction.com/?a=space" target="_blank" rel="noopener"><img src="img/lp-a-space.jpg" alt="Found a space version"><span>Found a space<small>?a=space</small></span></a>
+    <a class="shot" href="https://build.medicoconstruction.com/?a=expand" target="_blank" rel="noopener"><img src="img/lp-a-expand.jpg" alt="Expansion version"><span>Expanding<small>?a=expand</small></span></a>
+    <a class="shot" href="https://build.medicoconstruction.com/?a=newclinic" target="_blank" rel="noopener"><img src="img/lp-a-newclinic.jpg" alt="New clinic version"><span>Opening a new clinic<small>?a=newclinic</small></span></a>
+    <a class="shot" href="https://build.medicoconstruction.com/?a=plan" target="_blank" rel="noopener"><img src="img/lp-a-plan.jpg" alt="Still planning version"><span>Still planning<small>?a=plan</small></span></a>
+    <a class="shot" href="https://build.medicoconstruction.com/?a=design0" target="_blank" rel="noopener"><img src="img/lp-a-design0.jpg" alt="$0 design version"><span>$0 design<small>?a=design0</small></span></a>
+  </div>
+
+  <h2>Heatmaps and conversion <small>Clarity · last 7 days · 178 phone page views</small></h2>
+  <div class="heat">
+    <figure><img src="img/heat-scroll.jpg" alt="Clarity scroll map, phones, last 7 days"><figcaption>Scroll map, phones, last 7 days. Red = seen by most visitors; it fades to yellow by the form.</figcaption></figure>
+    <div class="hstats">
+      <div class="kpi"><b>87%</b><span>of visitors on phones · 76% inside the Facebook or Instagram app</span></div>
+      <div class="kpi"><b>73% → 24%</b><span>reach the top 5% of the page → reach 10%. Most leave on the first screen</span></div>
+      <div class="kpi"><b>0</b><span>rage clicks · 0 quick-backs · dead clicks in 3.7% of visits: nothing on the page is broken</span></div>
+      <div class="kpi"><b>Cost · timeline</b><span>The FAQ questions people opened most: cost, build time, renovating while open, "is design really free?"</span></div>
+    </div>
+  </div>
+  <h3 style="margin:22px 0 10px">Conversion plan</h3>
+  <div class="week">
+    <div><span class="d">Done</span><span class="who">6 Oct</span><span>Form now records every step reached, so we can see which question people leave on (live in Clarity and Google Analytics)</span></div>
+    <div><span class="d">Done</span><span class="who">1 to 6 Oct</span><span>Headline matches the ad clicked (5 Meta versions, 5 Google versions)</span></div>
+    <div><span class="d">14 Oct</span><span class="who">Test</span><span>Phones: first form question directly under the headline, trust tiles moved below the form. Most visitors never leave the first screen</span></div>
+    <div><span class="d">14 Oct</span><span class="who">Test</span><span>Cost and build-time answers in 2 lines next to the contact step, since those are the questions people open</span></div>
+    <div><span class="d">14 Oct</span><span class="who">Check</span><span>Page speed inside the Instagram and Facebook app browser, where 3 in 4 visitors open the page</span></div>
+  </div>
+
+  <h2>Tracking <small>every lead counted once, by the channel that brought it</small></h2>
+  <div class="tl">
+    <div><b>Meta</b>Browser pixel plus server events with the same event ID, so a lead is never counted twice. Match quality 9.3 out of 10. Meta gets no credit for Google leads.</div>
+    <div><b>Google</b>Conversion counted only on a real submitted lead, with enhanced conversions (hashed email and phone). Google Analytics records every lead.</div>
+    <div><b>Every ad link</b>Tagged with the campaign, ad set and ad ID, so each lead in Monday shows exactly which ad and keyword brought it.</div>
+    <div><b>Lead flow</b>Junk filter, then Google Sheet, Monday board and an instant email alert. Daily report email at 2 pm IST.</div>
+    <div><b>Clarity</b>Session recordings, heatmaps, each visit tagged Meta or Google, and form step tracking.</div>
+  </div>
+</section><section class="panel" role="tabpanel" id="work" aria-labelledby="t-work" hidden>
+  <h2>Since 8 Oct <small>newest first</small></h2>
+  <div class="tl">
+    <div><b>Reminder emails, 14 Oct</b>5 emails written (confirmation, day before, 1 hour, missed call, follow-up) and put on Monday for the Medico team to edit. Emails tab added. They switch on once the copy is approved and Gmail is connected.</div>
+    <div><b>Appointments, 14 Oct</b>Appointment date, type, status and meeting link columns added on Monday, with reminder timing. 2 missed calls marked No-show.</div>
+    <div><b>Google fixes, 14 Oct</b>Clinic Build bid cap raised to CAD 14.40 (it lost 41% of views to rank). 12 junk words blocked on Clinic Design (decor, murals, website, guides and more). Brand ad that sent people to the homepage paused; the landing page version runs instead.</div>
+    <div><b>Ad direction, 14 Oct</b>Brief for Ameya: keep &quot;Opening or expanding a clinic?&quot;, make fresh photos in feed and Stories sizes.</div>
+    <div><b>Monday cleanup, 12 Oct</b>Junk form fills no longer land on the Monday board. ZippyScale still sees them.</div>
+    <div><b>Meta campaign switched, 10 Oct</b>New campaign live at CAD 70/day: BC Stories and Reels 30, BC feeds 25, Alberta 15. Old ad sets paused. Each ad carries 5 texts, 5 headlines and 5 descriptions.</div>
+    <div><b>Meta learns from Monday, 10 Oct</b>When a lead moves to In Progress or Converted on Monday, Meta is told, so it can find more leads like the good ones. Grade A leads are flagged too.</div>
+  </div>
+
+  <h2>What we did since 21 Sep</h2>
+  <div class="tl">
+    <div><b>Audit</b>Google had applied its own bidding without asking (CAD 20 to 25 a click) and was counting form attempts as leads. Both fixed.</div>
+    <div><b>Landing page</b>New page with a 7-step form, 10 headline versions by keyword and ad, and a junk filter. Details below.</div>
+    <div><b>Tracking + heatmaps</b>Meta and Google tracking rebuilt, every lead traced to its ad, Clarity heatmaps and recordings. Details below.</div>
+    <div><b>Google rebuilt</b>4 campaigns, healthcare-only keywords, capped bids, new ads, images and sitelinks.</div>
+    <div><b>Meta rebuilt</b>Facebook and Instagram only. Separate BC and Alberta budgets. Retargeting for visitors who didn't fill the form.</div>
+    <div><b>Meta, 8 Oct</b>Low click rate fixed at the ad level: weakest BC ad cut, "Still planning?" in both provinces, retargeting paused, job-title test live, automatic cut and fatigue rules on.</div>
+    <div><b>Areas</b>Metro Vancouver, Fraser Valley, Victoria, Nanaimo, Calgary, Edmonton. No US.</div>
+  </div>
+</section>
+  <footer>ZippyScale · First names only, no contacts on this page; details stay in Monday.</footer>
+</div>
+<script>
+(function(){var b=[].slice.call(document.querySelectorAll('.tabs button'));
+function show(id){b.forEach(function(x){var on=x.getAttribute('aria-controls')===id;x.setAttribute('aria-selected',on);document.getElementById(x.getAttribute('aria-controls')).hidden=!on;});}
+b.forEach(function(x){x.addEventListener('click',function(){show(x.getAttribute('aria-controls'));try{history.replaceState(null,'','#'+x.getAttribute('aria-controls'))}catch(e){}});});
+var h=(location.hash||'').slice(1);if(document.getElementById(h)&&h)show(h);
+function d(m){var h=m/60;return m<60?Math.round(m)+' min':h<24?h.toFixed(1)+' h':(h/24).toFixed(1)+' days';}
+function tick(){var n=Date.now();[].forEach.call(document.querySelectorAll('[data-since]'),function(x){x.textContent='Waiting '+d((n-Date.parse(x.getAttribute('data-since')))/6e4);});
+var u=document.querySelector('[data-built]');if(u){var a=(n-Date.parse(u.getAttribute('data-built')))/6e4;u.textContent='Updated '+(a<1?'just now':d(a)+' ago');}}
+tick();setInterval(tick,60000);})();
+</script>
